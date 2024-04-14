@@ -14,9 +14,25 @@ app.use(
 
 // GET method route
 app.get('/', (request, response) => {
-    response.send({
-        message: 'Node.js and Express REST API'
-    });
+    response.send(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>My Simple Website</title>
+            </head>
+            <body>
+                <h1>Node.js and Express REST API</h1>
+                <p>Welcome to my simple website built with Node.js and Express!</p>
+                <h2>Available APIs:</h2>
+                <ul>
+                    <li><a href="/users">/users</a></li>
+                    <li><a href="/radio?searchterm=rock">/radio?searchterm=rock</a></li>
+                    <li><a href="/radio/top">/radio/top</a></li>
+                    <!-- Add more API endpoints here -->
+                </ul>
+            </body>
+        </html>
+    `);
 });
 
 //Get users
@@ -29,7 +45,6 @@ const server = app.listen(port, (error) => {
   if (error) return console.log(`Error: ${error}`);
   console.log(`Server listening on port ${server.address().port}`);
 });
-
 
 
 const users = [
@@ -47,23 +62,59 @@ const users = [
 
 // Get radio stations by name
 app.get('/radio', async (request, response) => {
-    //const { name } = request.query;
-    let filter = {
-        by: 'name', // stations by tag,
-        searchterm: 'kim',
-        limit: 25
+    try {
+        let filter = {
+            by: 'name', // stations by tag,
+            searchterm: request.query.searchterm,
+            limit: 25
+        }
+        const stations = await RadioBrowser.getStations(filter);
+        response.send(stations);
+    } catch (error) {
+        console.error(error);
+        response.status(500).send('An error occurred while fetching radio stations.');
     }
-    const stations = await RadioBrowser.getStations(filter);
-    response.send(stations);
 });
 
 // Get top 5 radio stations by click count
 app.get('/radio/top', async (request, response) => {
-    let filter = {
-        by: 'topclick', // stations by topvote
-        limit: 5    // top 5 stations
+    try {
+        let filter = {
+            by: 'topclick', // stations by topvote
+            limit: 5    // top 5 stations
+        }
+        const stations = await RadioBrowser.getStations(filter);
+        response.send(stations);
+    } catch (error) {
+        console.error(error);
+        response.status(500).send('An error occurred while fetching top radio stations.');
     }
-    const stations = await RadioBrowser.getStations(filter);
-    response.send(stations);
+});
+
+const urlPlaying = [
+    {
+        url: ""
+    }
+]
+
+// Post radio station URL
+app.post('/radio/play', async (request, response) => {
+    try {
+        urlPlaying[0].url = request.body.url;
+        response.send(urlPlaying);
+    } catch (error) {
+        console.error(error);
+        response.status(500).send('An error occurred while fetching playing radio station.');
+    }
+});
+
+// Get radio station URL
+app.get('/radio/play', async (request, response) => {
+    try {
+        response.send(urlPlaying);
+    } catch (error) {
+        console.error(error);
+        response.status(500).send('An error occurred while fetching playing radio station.');
+    }
 });
 
