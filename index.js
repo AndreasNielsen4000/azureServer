@@ -1,9 +1,19 @@
-const http = require('http');
+import bodyParser from "body-parser";
+import express from "express";
+import routes from "./routes/routes.js";
+const app = express();
 const port = process.env.PORT || 3000;
 
-http.createServer(function(request, response) {
-  response.writeHead(200, { 'Content-Type': 'text/plain' });
-  response.end('Hello World!');
-}).listen(port);
-
-console.log(`Server running at http://localhost:${port}`);
+// Use Node.js body parsing middleware 
+app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
+routes(app);
+// Start the server 
+const server = app.listen(port, (error) => {
+  if (error) return console.log(`Error: ${error}`);
+  console.log(`Server listening on port ${server.address().port}`);
+});
