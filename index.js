@@ -1,5 +1,6 @@
 const bodyParser = require('body-parser');
 const express = require('express')
+const RadioBrowser = require('radio-browser');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -43,3 +44,26 @@ const users = [
       email: "gilfoyle@piedpiper.com",
     },
 ];
+
+// Get radio stations by name
+app.get('/radio', async (request, response) => {
+    //const { name } = request.query;
+    let filter = {
+        by: 'name', // stations by tag,
+        searchterm: 'kim',
+        limit: 25
+    }
+    const stations = await RadioBrowser.getStations(filter);
+    response.send(stations);
+});
+
+// Get top 5 radio stations by click count
+app.get('/radio/top', async (request, response) => {
+    let filter = {
+        by: 'topclick', // stations by topvote
+        limit: 5    // top 5 stations
+    }
+    const stations = await RadioBrowser.getStations(filter);
+    response.send(stations);
+});
+
